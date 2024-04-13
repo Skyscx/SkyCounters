@@ -16,23 +16,20 @@ public class TopMessagesCMD implements CommandExecutor {
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("Only players can use this command.");
-            return true;
-        }
-
         List<String> topPlayers = datebase.getTopPlayers();
 
         if (topPlayers.isEmpty()) {
-            sender.sendMessage("No players found.");
+            sender.sendMessage("ПУсто, как так то...");
             return true;
         }
 
-        sender.sendMessage("Top 10 players by message count:");
+        sender.sendMessage("§3Топ игроков по отправленным сообщениям:");
         for (String player : topPlayers) {
             sender.sendMessage(player);
         }
-
+        if (sender instanceof Player player){
+            datebase.getPlacePlayerTop(player.getName());
+        }
         return true;
     }
 }

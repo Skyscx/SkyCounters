@@ -2,8 +2,11 @@ package me.skyscx.skycounters;
 
 import me.skyscx.skycounters.commands.TopMessagesCMD;
 import org.bukkit.Bukkit;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.sql.SQLException;
 import java.util.Objects;
 
 public final class SkyCounters extends JavaPlugin {
@@ -12,16 +15,28 @@ public final class SkyCounters extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        datebase = new Datebase("plugin.db");
-        datebase.createTable();
+        try {
+            datebase = new Datebase(getDataFolder());
+        } catch (SQLException e) {
+            e.printStackTrace();
+            getLogger().severe("Failed to create database.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
 
-        Objects.requireNonNull(getCommand("topmessages")).setExecutor(new TopMessagesCMD(datebase));
+        PluginCommand command = getCommand("topmessages");
+        if (command != null) {
+            command.setExecutor(new TopMessagesCMD(datebase));
+        }
 
         Bukkit.getPluginManager().registerEvents(new Events(datebase), this);
+
+
     }
 
     @Override
     public void onDisable() {
         datebase.closeConnection();
     }
+
 }

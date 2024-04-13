@@ -4,5 +4,5 @@ main: me.skyscx.skycounters.SkyCounters
 api-version: '1.20'
 commands:
   topmessages:
-    description: View the top 10 players by message count
-    usage: /topmessages
+    description: Test
+    usage: /test - sss
