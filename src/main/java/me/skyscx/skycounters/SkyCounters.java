@@ -31,7 +31,7 @@ public final class SkyCounters extends JavaPlugin {
             return;
         }
 
-        getCommand("topmessages").setExecutor(new TopMessagesCMD(datebase));
+        getCommand("top").setExecutor(new TopMessagesCMD(datebase));
         getCommand("scdelete").setExecutor(new DeletePlayerInDatebase(datebase));
 
         Bukkit.getPluginManager().registerEvents(new Events(datebase), this);

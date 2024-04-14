@@ -3,7 +3,7 @@ version: '1.1'
 main: me.skyscx.skycounters.SkyCounters
 api-version: '1.20'
 commands:
-  topmessages:
+  top:
     description: Список топа по популярным сообщениям
     usage: /topmessages
     aliases:
