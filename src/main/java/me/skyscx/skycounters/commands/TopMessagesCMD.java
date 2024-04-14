@@ -28,7 +28,9 @@ public class TopMessagesCMD implements CommandExecutor {
             sender.sendMessage(player);
         }
         if (sender instanceof Player player){
-            datebase.getPlacePlayerTop(player.getName());
+            int placeTopMessages = datebase.getPlayerPosition(player.getName());
+            String message = "§3Вы занимаете §7" + placeTopMessages + "§3 место в рейтинге.";
+            sender.sendMessage(message);
         }
         return true;
     }

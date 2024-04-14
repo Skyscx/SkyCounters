@@ -2,13 +2,7 @@ package me.skyscx.skycounters;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.AbstractMap;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,21 +26,34 @@ public class Datebase {
     }
 
     void createTable() throws SQLException {
-        String sql = "CREATE TABLE IF NOT EXISTS players_count_messages (" +
+        String sql = "CREATE TABLE IF NOT EXISTS players_counters (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                 "name TEXT NOT NULL," +
-                "count INTEGER NOT NULL" +
+                "messages INTEGER NOT NULL," +
+                "deaths INTEGER NOT NULL," +
+                "kills INTEGER NOT NULL," +
+                "kills_mobs INTEGER NOT NULL," +
+                "set_blocks INTEGER NOT NULL," +
+                "break_blocks INTEGER NOT NULL," +
+                "score_top_online INTEGER NOT NULL," +
+                "titul_player TEXT NOT NULL," +
+                "column_int_add1 INTEGER NOT NULL," +
+                "column_int_add2 INTEGER NOT NULL," +
+                "column_int_add3 INTEGER NOT NULL," +
+                "column_text_add1 TEXT NOT NULL," +
+                "column_text_add2 TEXT NOT NULL," +
+                "column_text_add3 TEXT NOT NULL" +
                 ");";
         try (java.sql.Statement stmt = connection.createStatement()) {
             stmt.execute(sql);
         }
     }
 
-    public void insertPlayer(String name, int count) {
-        String sql = "INSERT INTO players_count_messages(name,count) VALUES(?,?)";
+    public void insertPlayer(String name, int messages) {
+        String sql = "INSERT INTO players_counters(name,messages) VALUES(?,?)";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, name);
-            pstmt.setInt(2, count);
+            pstmt.setInt(2, messages);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -54,7 +61,7 @@ public class Datebase {
     }
 
     public void updatePlayerCountMessages(String name) {
-        String sql = "UPDATE players_count_messages SET count = count + 1 WHERE name = ?";
+        String sql = "UPDATE players_counters SET count = messages + 1 WHERE name = ?";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, name);
@@ -66,11 +73,11 @@ public class Datebase {
 
     public List<String> getPlayers() {
         List<String> players = new ArrayList<>();
-        String sql = "SELECT name, count FROM players_count_messages";
+        String sql = "SELECT name, messages FROM players_counters";
         try (Statement stmt = connection.createStatement()) {
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
-                players.add(rs.getString("name") + " - " + rs.getInt("count"));
+                players.add(rs.getString("name") + " - " + rs.getInt("messages"));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -78,7 +85,7 @@ public class Datebase {
         return players;
     }
     public boolean checkPlayer(String name) {
-        String sql = "SELECT * FROM players_count_messages WHERE name = ?";
+        String sql = "SELECT * FROM players_counters WHERE name = ?";
 
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, name);
@@ -93,7 +100,7 @@ public class Datebase {
     }
 
     public void deletePlayer(String name) {
-        String sql = "DELETE FROM players_count_messages WHERE name = ?";
+        String sql = "DELETE FROM players_counters WHERE name = ?";
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             pstmt.setString(1, name);
             pstmt.executeUpdate();
@@ -102,7 +109,7 @@ public class Datebase {
         }
     }
     public List<String> getTopPlayers() {
-        String sql = "SELECT * FROM players_count_messages ORDER BY count DESC LIMIT 10";
+        String sql = "SELECT * FROM players_counters ORDER BY messages DESC LIMIT 10";
         List<String> topPlayers = new ArrayList<>();
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -110,40 +117,33 @@ public class Datebase {
                 while (rs.next()) {
                     int stage = i++;
                     String name = rs.getString("name");
-                    int count = rs.getInt("count");
-                    topPlayers.add(String.format("%d. §7%s§r: §7%d §rсообщений",stage, name, count));
+                    int messages = rs.getInt("count");
+                    topPlayers.add(String.format("%d. §7%s§r: §7%d §rсообщений",stage, name, messages));
                 }
-
-                //topPlayers.add(String.format("Вы занимаете %d место в рейтинге."));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return topPlayers;
     }
-    public String getPlacePlayerTop(String name){
-        int playerScore = getCountPlayerTop(name);
-        List<String> topPlayers = getTopPlayers();
-        int playerPosition = topPlayers.indexOf(new AbstractMap.SimpleEntry<>(name, playerScore)) + 1;
-        String message = "§3Вы занимаете §7" + playerPosition + "§3 место в рейтинге";
-        return message;
-    }
-    public int getCountPlayerTop(String name){
-        int score = 0;
-        String sql = "SELECT score FROM players_count_messages WHERE name = ?";
+    public int getPlayerPosition(String name) {
+        String sql = "SELECT * FROM players_counters ORDER BY messages DESC";
+        int playerPosition = 1;
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-            pstmt.setString(1, name);
-            ResultSet resultSet = pstmt.executeQuery();
-            if (resultSet.next()) {
-                score = resultSet.getInt("score");
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    String nameC = rs.getString("name");
+                    if (nameC.equalsIgnoreCase(name)) {
+                        return playerPosition;
+                    }
+                    playerPosition++;
+                }
             }
-            }
-        catch (SQLException ex) {
-            throw new RuntimeException(ex);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return score;
+        return -1;
     }
-//topPlayers.add(String.format("Вы занимаете %d место в рейтинге."));
     public void closeConnection() {
         try {
             if (connection != null && !connection.isClosed()) {
