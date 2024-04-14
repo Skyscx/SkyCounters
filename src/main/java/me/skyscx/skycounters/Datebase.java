@@ -140,7 +140,6 @@ public class Datebase {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             List<String> topPlayers = topPlayersCache.getIfPresent("topPlayers");
             if (topPlayers == null) {
-                System.out.println("DATA NO INIT CACHE");
                 String sql = "SELECT * FROM players_counters ORDER BY messages DESC LIMIT 10";
                 try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
                     try (ResultSet rs = pstmt.executeQuery()) {
@@ -180,7 +179,7 @@ public class Datebase {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return -1; // возвращаем -1, если игрок не найден
+        return -1;
     }
     public void closeConnection() {
         try {

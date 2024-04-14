@@ -1,8 +1,11 @@
 name: SkyCounters
-version: '${version}'
+version: '1.1'
 main: me.skyscx.skycounters.SkyCounters
 api-version: '1.20'
 commands:
   topmessages:
-    description: Test
-    usage: /test - sss
+    description: Список топа по популярным сообщениям
+    usage: /topmessages - Вывести топ по отправленным сообщениям
+    aliases:
+      - tm
+      - topm
