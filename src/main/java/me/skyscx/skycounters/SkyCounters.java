@@ -10,11 +10,12 @@ import java.sql.SQLException;
 import java.util.Objects;
 
 public final class SkyCounters extends JavaPlugin {
-
+    private static SkyCounters plugin;
     private Datebase datebase;
 
     @Override
     public void onEnable() {
+        plugin = this;
         try {
             datebase = new Datebase(getDataFolder(), this);
         } catch (SQLException e) {
@@ -38,5 +39,7 @@ public final class SkyCounters extends JavaPlugin {
     public void onDisable() {
         datebase.closeConnection();
     }
-
+    public static SkyCounters getPlugin() {
+        return plugin;
+    }
 }
