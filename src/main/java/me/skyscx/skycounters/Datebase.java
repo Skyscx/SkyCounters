@@ -4,7 +4,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.bukkit.Bukkit;
-import org.bukkit.scheduler.BukkitScheduler;
 
 import java.io.File;
 import java.io.IOException;
@@ -165,30 +164,23 @@ public class Datebase {
         return future;
     }
 
-    public CompletableFuture<Integer> getPlayerPosition(String name) {
-        CompletableFuture<Integer> future = new CompletableFuture<>();
-
-        BukkitScheduler scheduler = plugin.getServer().getScheduler();
-        scheduler.runTaskAsynchronously(plugin, () -> {
-            String sql = "SELECT * FROM players_counters ORDER BY messages DESC";
-            int playerPosition = 1;
-            try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-                try (ResultSet rs = pstmt.executeQuery()) {
-                    while (rs.next()) {
-                        String nameC = rs.getString("name");
-                        if (nameC.equalsIgnoreCase(name)) {
-                            future.complete(playerPosition);
-                            return;
-                        }
-                        playerPosition++;
+    public int getPlayerPosition(String playerName) {
+        String sql = "SELECT * FROM players_counters ORDER BY messages DESC";
+        int playerPosition = 1;
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    String name = rs.getString("name");
+                    if (name.equalsIgnoreCase(playerName)) {
+                        return playerPosition;
                     }
+                    playerPosition++;
                 }
-            } catch (SQLException e) {
-                e.printStackTrace();
-                future.complete(-1);
             }
-        });
-        return future;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1; // возвращаем -1, если игрок не найден
     }
     public void closeConnection() {
         try {
