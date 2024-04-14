@@ -16,7 +16,7 @@ public final class SkyCounters extends JavaPlugin {
     @Override
     public void onEnable() {
         try {
-            datebase = new Datebase(getDataFolder());
+            datebase = new Datebase(getDataFolder(), this);
         } catch (SQLException e) {
             e.printStackTrace();
             getLogger().severe("Failed to create database.");
@@ -26,10 +26,10 @@ public final class SkyCounters extends JavaPlugin {
 
         PluginCommand command = getCommand("topmessages");
         if (command != null) {
-            command.setExecutor(new TopMessagesCMD(datebase));
+            command.setExecutor(new TopMessagesCMD(datebase, this));
         }
 
-        Bukkit.getPluginManager().registerEvents(new Events(datebase), this);
+        Bukkit.getPluginManager().registerEvents(new Events(datebase, this), this);
 
 
     }
