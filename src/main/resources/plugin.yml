@@ -5,7 +5,13 @@ api-version: '1.20'
 commands:
   topmessages:
     description: Список топа по популярным сообщениям
-    usage: /topmessages - Вывести топ по отправленным сообщениям
+    usage: /topmessages
     aliases:
       - tm
       - topm
+  scdelete:
+    description: Удалить из таблицы игрока
+    usage: /scdelete [name]
+    aliases:
+      - scd
+      - scdel

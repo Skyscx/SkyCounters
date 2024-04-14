@@ -1,5 +1,6 @@
 package me.skyscx.skycounters;
 
+import me.skyscx.skycounters.commands.DeletePlayerInDatebase;
 import me.skyscx.skycounters.commands.TopMessagesCMD;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -31,6 +32,7 @@ public final class SkyCounters extends JavaPlugin {
         }
 
         getCommand("topmessages").setExecutor(new TopMessagesCMD(datebase));
+        getCommand("scdelete").setExecutor(new DeletePlayerInDatebase(datebase));
 
         Bukkit.getPluginManager().registerEvents(new Events(datebase), this);
 

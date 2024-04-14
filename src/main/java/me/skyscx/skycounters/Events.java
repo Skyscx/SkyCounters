@@ -2,6 +2,7 @@ package me.skyscx.skycounters;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
@@ -21,6 +22,11 @@ public class Events implements Listener {
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         String name = event.getPlayer().getName();
         datebase.updatePlayerCountMessages(name);
+    }
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        String name = event.getPlayer().getName();
+        //datebase.updatePlayerCountMessages(name);
 
     }
 

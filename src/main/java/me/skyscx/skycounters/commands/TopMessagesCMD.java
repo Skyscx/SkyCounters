@@ -19,8 +19,8 @@ public class TopMessagesCMD implements CommandExecutor {
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        CompletableFuture<List<String>> topPlayers = datebase.getTopPlayers();
-        topPlayers.thenAccept(list -> {
+        CompletableFuture<List<String>> topPlayersMessageTop = datebase.getTopPlayersMessageTop();
+        topPlayersMessageTop.thenAccept(list -> {
             if (list.isEmpty()) {
                 sender.sendMessage("Пусто, как так то...");
                 return;
@@ -31,7 +31,7 @@ public class TopMessagesCMD implements CommandExecutor {
                 sender.sendMessage(player);
             }
             if (sender instanceof Player player) {
-                int place = datebase.getPlayerPosition(player.getName());
+                int place = datebase.getPlayerPositionMessageTop(player.getName());
                 String message = "§3Вы занимаете §7" + place + "§3 место в рейтинге.";
                 sender.sendMessage(message);
             }

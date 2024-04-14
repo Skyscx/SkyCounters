@@ -4,6 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,23 +59,13 @@ public class Datebase {
             stmt.execute(sql);
         }
     }
+    /**Создание игрока в базе данных**/
     public void insertPlayer(String name, int messages) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             String sql = "INSERT INTO players_counters(name,messages) VALUES(?,?)";
             try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
                 pstmt.setString(1, name);
                 pstmt.setInt(2, messages);
-                pstmt.executeUpdate();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        });
-    }
-    public void updatePlayerCountMessages(String name) {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            String sql = "UPDATE players_counters SET messages = messages + 1 WHERE name = ?";
-            try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
-                pstmt.setString(1, name);
                 pstmt.executeUpdate();
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -99,7 +90,25 @@ public class Datebase {
         });
         return future;
     }
-
+    public void deletePlayerLogyc(String name, CommandSender sender) {
+        CompletableFuture<Boolean> future = checkPlayer(name);
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            System.getLogger("Scheduler ENABLED");
+            try {
+                boolean result = future.join();
+                if (!result) {
+                    System.getLogger("!result");
+                    sender.sendMessage("§3Такого игрока не существует в базе данных!");
+                } else {
+                    sender.sendMessage("§3Игрок §7" + name + "§3 удален из базы данных!");
+                    deletePlayer(name);
+                    System.getLogger("result");
+                }
+            } catch (CompletionException e) {
+                e.printStackTrace();
+            }
+        });
+    }
     public void checkPlayerTask(String name) {
         CompletableFuture<Boolean> future = checkPlayer(name);
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
@@ -113,10 +122,10 @@ public class Datebase {
             }
         });
     }
-    //TODO: Реализовать удаление пользователя по команде.
-    public void deletePlayer(String name) {
+    /**Счетчик сообщений и вывод топа по сообщениям**/
+    public void updatePlayerCountMessages(String name) {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            String sql = "DELETE FROM players_counters WHERE name = ?";
+            String sql = "UPDATE players_counters SET messages = messages + 1 WHERE name = ?";
             try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
                 pstmt.setString(1, name);
                 pstmt.executeUpdate();
@@ -128,13 +137,13 @@ public class Datebase {
     LoadingCache<String, List<String>> topPlayersCache = CacheBuilder.newBuilder()
             .maximumSize(100)
             .expireAfterWrite(5, TimeUnit.MINUTES)
-            .build(new CacheLoader<String, List<String>>() {
+            .build(new CacheLoader<>() {
                 @Override
-                public List<String> load(String key) throws Exception {
-                    return (List<String>) getTopPlayers();
+                public List<String> load(String key) {
+                    return (List<String>) getTopPlayersMessageTop();
                 }
             });
-    public CompletableFuture<List<String>> getTopPlayers() {
+    public CompletableFuture<List<String>> getTopPlayersMessageTop() {
         CompletableFuture<List<String>> future = new CompletableFuture<>();
 
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
@@ -162,8 +171,7 @@ public class Datebase {
 
         return future;
     }
-
-    public int getPlayerPosition(String playerName) {
+    public int getPlayerPositionMessageTop(String playerName) {
         String sql = "SELECT * FROM players_counters ORDER BY messages DESC";
         int playerPosition = 1;
         try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
@@ -181,6 +189,22 @@ public class Datebase {
         }
         return -1;
     }
+
+    //TODO: Реализовать удаление пользователя по команде.
+    public void deletePlayer(String name) {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+            System.getLogger("Scheduler delete ENABLED");
+            String sql = "DELETE FROM players_counters WHERE name = ?";
+            try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+                System.getLogger("delete ENABLED");
+                pstmt.setString(1, name);
+                pstmt.executeUpdate();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
     public void closeConnection() {
         try {
             if (connection != null && !connection.isClosed()) {
